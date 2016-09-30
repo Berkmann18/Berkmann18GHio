@@ -1,0 +1,31 @@
+body {
+    background-color: #212121;
+}
+
+.container {
+    background-color: #fff;
+}
+
+nav li {
+    display: inline-block;
+    cursor: pointer;
+    background-color: #fff;
+}
+
+nav {
+    text-align: center;
+}
+
+nav li:hover {
+    background-color: #ccc;
+}
+
+li.active {
+    background-color: #0f0;
+}
+
+.gh, .gh a {
+    background: #444;
+    color: #fff;
+    text-decoration: none;
+}
