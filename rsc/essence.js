@@ -66,13 +66,14 @@
  * @property {function(string, function(string))} Essence.ask Ask something to the user
  * @property {function(): boolean} Essence.isComplete Module inclusion completeness check
  * @property {string[]} Essence.loadedModules List of loaded modules
+ * @property {Function} Essence.updateAll Update all modules
  * @todo Get the Essence.source thingy right, i.e get a suitable place to get it from (e.g: a website or an expoitable place of Dropbox)
  */
 var Essence = {
     version: "1.1b",
     author: "Maximilian Berkmann",
     description: "library used for DHTML connexions, maths, database management and cryptography",
-    source: "https://www.dropbox.com/s/n2sz2mxz5zwc05t/essence.js?dl=0",
+    source: "http://berkmann18.github.io/rsc/essence.js",
     element: $n,
     handleError: function (msg, url, line) {
         isType(msg, "Error")? alert("[Essence.js] An error has occurred (line/column " + msg.lineNumber + "/" + msg.columnNumber + " of " + msg.fileName + ").\n\nMessage: " + msg.stack): alert("[Essence.js] An error has occurred (line " + line + " of " + url + ").\n\nMessage: " + msg)
@@ -208,7 +209,14 @@ var Essence = {
             if (window[modules[i]].loaded) this.loadedModules.push(window[modules[i]]);
         }
         return !!complete;
-    }, loadedModules: []
+    }, loadedModules: [],
+    updateAll: function () {
+        this.update();
+        this.isComplete();
+        this.loadedModules.map(function (m) {
+            m.update();
+        })
+    }
 },
     /**
      * @description List of modules
@@ -261,6 +269,7 @@ var Essence = {
  * @property {Function} Module.load Load the module as well as initializing its dependencies
  * @property {function(): string} Module.toString String representation
  * @property {function(): number} Module.getWeight Weight of the module on EssenceJS's module ecosystem
+ * @property {Function} Module.update Update the module
  * @since 1.1
  */
 function Module (name, desc, dpc, ver, rn, pathVer) {
@@ -295,6 +304,14 @@ function Module (name, desc, dpc, ver, rn, pathVer) {
         return weight;
     };
 
+    this.update = function () {
+        var scriptArr = $e("*script");
+        for (var i = 0; i < scriptArr.length; i ++) {
+            if (scriptArr[i].src.indexOf(this.name + ".js") > -1) scriptArr[i].src = "http://berkmann18.github.io/rsc/modules/" + this.name + ".js";
+            else if (scriptArr[i].src.indexOf(this.name + ".min.js") > -1) scriptArr[i].src = "http://berkmann18.github.io/rsc/modules/" + this.name + ".min.js";
+        }
+        Essence.say(this.name.capitalize() + "%(.min).js%c has been updated", "succ", "text-decoration: underline", "text-decoration: none");
+    };
     return this;
 }
 
