@@ -136,9 +136,12 @@ var Essence = {
             $n("head").appendChild(s);
         } else $e("script[type='text/javascript']").after(nscript);
     }, update: function () { //To keep the script updated !!
-        var scriptArr = $e("*script");
-        for (var i = 0; i < scriptArr.length; i ++) {
-            if (scriptArr[i].src.indexOf("essence.js") > -1 || scriptArr[i].src.indexOf("essence.min.js") > -1) scriptArr[i].src = this.source || Essence.source;
+        var $s = $n("*script").toArray();
+        var scripts = filenameList($s.map(function (script) {
+            return script.src;
+        }));
+        for (var i = 0; i < scripts.length; i++) {
+            if (stripPath(scripts[i]) === "essence.js" || stripPath(scripts[i]) === "essence.min.js") $s[i].src = Essence.source;
         }
         Essence.say("%cEssence(.min).js%c has been updated", "succ", "text-decoration: underline", "text-decoration: none");
     },
@@ -304,13 +307,17 @@ function Module (name, desc, dpc, ver, rn, pathVer) {
         return weight;
     };
 
-    this.update = function () {
-        var scriptArr = $e("*script");
-        for (var i = 0; i < scriptArr.length; i ++) {
-            if (scriptArr[i].src.indexOf(this.name + ".js") > -1) scriptArr[i].src = "http://berkmann18.github.io/rsc/modules/" + this.name + ".js";
-            else if (scriptArr[i].src.indexOf(this.name + ".min.js") > -1) scriptArr[i].src = "http://berkmann18.github.io/rsc/modules/" + this.name + ".min.js";
+    this.update = function () { //This method should not be used before EssenceJS is fully implemented onto the environment using it
+        var $s = $n("*script").toArray();
+        var scripts = filenameList($s.map(function (script) {
+            return script.src;
+        }));
+        for (var i = 0; i < scripts.length; i++) {
+            if (stripPath(scripts[i]) === this.name + ".js") $s[i].src = "http://berkmann18.github.io/rsc/modules/" + this.name + ".js";
+            else if (stripPath(scripts[i]) === this.name + ".min.js") $s[i].src = "http://berkmann18.github.io/rsc/modules/" + this.name + ".min.js";
         }
-        Essence.say(this.name.capitalize() + "%(.min).js%c has been updated", "succ", "text-decoration: underline", "text-decoration: none");
+
+        Essence.say(this.name.capitalize() + "(.min).js has been updated", "succ");
     };
     return this;
 }
@@ -604,7 +611,7 @@ getExtPath = function (path) {
                     return m.name;
                 }).toStr(true));
         }
-        if (!filenameList(gatherExternalScripts(true)).has(Essence.source)) Essence.source = Essence.source.replace(".js", ".min.js");
+        if (!filenameList(gatherExternalScripts(true)).has("essence.js")) Essence.source = Essence.source.replace(".js", ".min.js");
         if (testMode) UnitTest.multiTest(UnitTest.libTests);
         UnitTest.libTests = [
             //essence
@@ -3599,12 +3606,12 @@ String.prototype.sameFirst = function (str) {
  * @external String
  */
 String.prototype.sameLast = function (str) {
-    var sf = "", pos = Math.min(this.length, str.length);
-    while (pos > 0) {
-        pos--;
-        //(this[pos] === str[pos])? sf += this[pos]: break;
-        if (this[pos] === str[pos]) sf += this[pos];
+    var sf = "", pos = 1, minLen = Math.min(this.length, str.length);
+    while (pos <= minLen) {
+        //(this[this.length - pos] === str[str.length - pos])? sf = this[this.length - pos] + sf: break;
+        if (this[this.length - pos] === str[str.length - pos]) sf = this[this.length - pos] + sf;
         else break;
+        pos++;
     }
     return sf;
 };
